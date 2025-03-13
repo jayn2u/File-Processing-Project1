@@ -7,9 +7,8 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  copy_tests:
     runs-on: ubuntu-22.04
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -18,16 +17,49 @@ jobs:
         run: |
           gcc -o copy copy.c
 
-      - name: Prepare test input and run copy
+      - name: Test copy normal file
         run: |
           # 원본 파일 생성
           echo "GitHub Actions 테스트 파일" > source.txt
           # copy 실행: source.txt를 복사하여 dest.txt로 생성
           ./copy source.txt dest.txt
-
-      - name: Validate output using diff
-        run: |
+          # 결과 검증
           diff source.txt dest.txt || { echo 'Copy test failed: source.txt and dest.txt differ'; exit 1; }
+          # 정리
+          rm source.txt dest.txt
+
+      - name: Test copy empty file
+        run: |
+          # 빈 파일 생성
+          touch empty.txt
+          # copy 실행: 빈 파일 복사
+          ./copy empty.txt empty_copy.txt
+          # 결과 검증
+          diff empty.txt empty_copy.txt || { echo 'Copy test failed: empty file copy did not match'; exit 1; }
+          # 정리
+          rm empty.txt empty_copy.txt
+
+      - name: Test copy binary file
+        run: |
+          # 1MB 크기의 바이너리 파일 생성
+          head -c 1048576 /dev/urandom > binary_source.bin
+          # copy 실행: 바이너리 파일 복사
+          ./copy binary_source.bin binary_dest.bin
+          # 결과 검증
+          diff binary_source.bin binary_dest.bin || { echo 'Copy test failed: binary file copy did not match'; exit 1; }
+          # 정리
+          rm binary_source.bin binary_dest.bin
+
+      - name: Test copy with non-existent source
+        run: |
+          # 존재하지 않는 소스 파일로 copy 실행, 실패가 예상됨
+          ./copy non_existent.txt dest.txt && { echo 'Copy test failed: expected failure on non-existent source'; exit 1; } || echo "Expected failure occurred."
+
+  merge_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Compile merge.c using default GCC
         run: |
@@ -48,6 +80,13 @@ jobs:
           cat file1.txt file2.txt > expected.txt
           # 출력 결과와 expected.txt 파일을 비교, 차이가 있으면 실패
           diff expected.txt output.txt || { echo 'Merge test failed: output.txt does not match expected.txt'; exit 1; }
+
+  write_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Compile write.c using default GCC
         run: |
           gcc -o write write.c
@@ -62,6 +101,12 @@ jobs:
           echo "abcdeXYZij" > expected_write.txt
           diff expected_write.txt write.txt || { echo 'Write test failed: write.txt does not match expected content'; exit 1; }
 
+  insert_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
       - name: Compile insert.c using default GCC
         run: |
           gcc -o insert insert.c
@@ -75,6 +120,12 @@ jobs:
         run: |
           echo "abcdefghXYZij" > expected_insert.txt
           diff expected_insert.txt insert.txt || { echo 'Insert test failed: insert.txt does not match expected content'; exit 1; }
+
+  delete_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Compile delete.c using default GCC
         run: |
