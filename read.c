@@ -19,7 +19,7 @@ int main(const int argc, char *argv[]) {
 
     const size_t bytes_to_read = strtoul(argv[2], NULL, 10);
     if (bytes_to_read == 0) {
-        return EXIT_FAILURE;
+        return EXIT_SUCCESS;
     }
 
     const char *filename = argv[3];
