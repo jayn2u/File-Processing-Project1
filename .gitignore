@@ -1,2 +1,6 @@
+# cmake 빌드 파일
 /cmake-build-debug/
-/a.out
+
+# Sample Text 파일
+*.txt
+

@@ -3,10 +3,9 @@ project(FileProcessingProject1 C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(FileProcessingProject1
-        copy.c
-        merge.c
-        read.c
-        write.c
-        insert.c
-        delete.c)
+add_executable(copy_exec copy.c)
+add_executable(merge_exec merge.c)
+add_executable(read_exec read.c)
+add_executable(write_exec write.c)
+add_executable(insert_exec insert.c)
+add_executable(delete_exec delete.c)
