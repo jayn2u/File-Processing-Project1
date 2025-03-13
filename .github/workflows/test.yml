@@ -14,11 +14,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install GCC 13.2
+      - name: Install GCC 13 via PPA on Ubuntu 22.04
         run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
           sudo apt-get update
           sudo apt-get install -y gcc-13 g++-13
-          gcc-13 --version
 
       - name: Compile copy.c using GCC 13.2
         run: |
