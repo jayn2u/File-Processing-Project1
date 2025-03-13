@@ -24,7 +24,7 @@ int main(const int argc, char *argv[]) {
     }
 
     char buffer[1024];
-    size_t bytes_count = 10;
+    size_t bytes_count = 1;
     while (fread(buffer, sizeof(char), bytes_count, source) > 0) {
         fwrite(buffer, sizeof(char), bytes_count, dest);
     }
