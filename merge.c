@@ -6,6 +6,11 @@
 #include <sys/stat.h>
 
 int main(int argc, char *argv[]) {
+    if (argc != 4) {
+        perror("잘못된 접근입니다.");
+        perror("사용법 : ./실행파일 파일1 파일2 파일3");
+    }
+
     FILE *file1 = fopen(argv[1], "wb");
     if (file1 == NULL) {
         perror("Error opening file1");
@@ -57,11 +62,12 @@ int main(int argc, char *argv[]) {
     }
 
     if (statOut.st_size != (stat2.st_size + stat3.st_size)) {
-        fprintf(stderr, "Verification failed: output file size (%ld) != file2 size (%ld) + file3 size (%ld)\n",
+        fprintf(stderr, "병합 파일 크기 불일치: file1 size (%ld) != file2 size (%ld) + file3 size (%ld)\n",
                 statOut.st_size, stat2.st_size, stat3.st_size);
         exit(EXIT_FAILURE);
     } else {
-        printf("Verification succeeded: output file size (%ld) equals file2 size (%ld) + file3 size (%ld)\n",
+        printf("병합 파일 크기 일치 : file1 size (%ld) equals file2 size (%ld) + file3 size (%ld)\n",
                statOut.st_size, stat2.st_size, stat3.st_size);
+        exit(EXIT_SUCCESS);
     }
 }
