@@ -1,0 +1,36 @@
+name: Build and Test copy.c
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install GCC 13.2
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-13 g++-13
+          gcc-13 --version
+
+      - name: Compile copy.c using GCC 13.2
+        run: |
+          gcc-13 -o copy copy.c
+
+      - name: Prepare test input and run copy
+        run: |
+          # 원본 파일 생성
+          echo "GitHub Actions 테스트 파일" > source.txt
+          # copy 실행: source.txt를 복사하여 dest.txt로 생성
+          ./copy source.txt dest.txt
+
+      - name: Validate output using diff
+        run: |
+          diff source.txt dest.txt
