@@ -14,15 +14,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install GCC 13 via PPA on Ubuntu 22.04
+      - name: Compile copy.c using default GCC
         run: |
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-          sudo apt-get update
-          sudo apt-get install -y gcc-13 g++-13
-
-      - name: Compile copy.c using GCC 13.2
-        run: |
-          gcc-13 -o copy copy.c
+          gcc -o copy copy.c
 
       - name: Prepare test input and run copy
         run: |
