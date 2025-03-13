@@ -1,4 +1,4 @@
-name: Build and Test copy.c
+name: Build and Test Project 1
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Validate output using diff
         run: |
-          diff source.txt dest.txt
+          diff source.txt dest.txt || { echo 'Copy test failed: source.txt and dest.txt differ'; exit 1; }
 
       - name: Compile merge.c using default GCC
         run: |
@@ -46,5 +46,5 @@ jobs:
         run: |
           # 두 입력 파일을 순서대로 연결한 expected.txt 파일 생성
           cat file1.txt file2.txt > expected.txt
-          # 출력 결과와 expected.txt 파일을 비교
-          diff expected.txt output.txt
+          # 출력 결과와 expected.txt 파일을 비교, 차이가 있으면 실패
+          diff expected.txt output.txt || { echo 'Merge test failed: output.txt does not match expected.txt'; exit 1; }
