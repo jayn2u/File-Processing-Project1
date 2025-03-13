@@ -36,7 +36,7 @@ int main(const int argc, char *argv[]) {
 
     char buffer[1024] = {};
     fread(buffer, bytes_to_read, 1, source);
-    printf(buffer);
+    printf("%s", buffer);
 
     fclose(source);
 
