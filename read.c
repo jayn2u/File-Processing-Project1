@@ -34,7 +34,7 @@ int main(const int argc, char *argv[]) {
         perror("fseek 과정 중 문제가 발생했습니다.");
     }
 
-    char buffer[1024];
+    char buffer[1024] = {};
     fread(buffer, bytes_to_read, 1, source);
     printf(buffer);
 
