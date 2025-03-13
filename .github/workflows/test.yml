@@ -48,3 +48,44 @@ jobs:
           cat file1.txt file2.txt > expected.txt
           # 출력 결과와 expected.txt 파일을 비교, 차이가 있으면 실패
           diff expected.txt output.txt || { echo 'Merge test failed: output.txt does not match expected.txt'; exit 1; }
+      - name: Compile write.c using default GCC
+        run: |
+          gcc -o write write.c
+
+      - name: Prepare test input and run write
+        run: |
+          echo "abcdefghij" > write.txt
+          ./write 5 "XYZ" write.txt
+
+      - name: Validate write output using diff
+        run: |
+          echo "abcdeXYZij" > expected_write.txt
+          diff expected_write.txt write.txt || { echo 'Write test failed: write.txt does not match expected content'; exit 1; }
+
+      - name: Compile insert.c using default GCC
+        run: |
+          gcc -o insert insert.c
+
+      - name: Prepare test input and run insert
+        run: |
+          echo "abcdefghij" > insert.txt
+          ./insert 7 "XYZ" insert.txt
+
+      - name: Validate insert output using diff
+        run: |
+          echo "abcdefghXYZij" > expected_insert.txt
+          diff expected_insert.txt insert.txt || { echo 'Insert test failed: insert.txt does not match expected content'; exit 1; }
+
+      - name: Compile delete.c using default GCC
+        run: |
+          gcc -o delete delete.c
+
+      - name: Prepare test input and run delete
+        run: |
+          echo "0123456789" > delete.txt
+          ./delete 3 4 delete.txt
+
+      - name: Validate delete output using diff
+        run: |
+          echo "012789" > expected_delete.txt
+          diff expected_delete.txt delete.txt || { echo 'Delete test failed: delete.txt does not match expected content'; exit 1; }
