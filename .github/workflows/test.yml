@@ -28,3 +28,23 @@ jobs:
       - name: Validate output using diff
         run: |
           diff source.txt dest.txt
+
+      - name: Compile merge.c using default GCC
+        run: |
+          gcc -o merge merge.c
+
+      - name: Prepare test input and run merge
+        run: |
+          # 첫 번째 입력 파일 생성
+          echo "Hello from file 1" > file1.txt
+          # 두 번째 입력 파일 생성
+          echo "Hello from file 2" > file2.txt
+          # merge 실행: output.txt에 file1.txt와 file2.txt 병합 결과 저장
+          ./merge output.txt file1.txt file2.txt
+
+      - name: Validate output using diff
+        run: |
+          # 두 입력 파일을 순서대로 연결한 expected.txt 파일 생성
+          cat file1.txt file2.txt > expected.txt
+          # 출력 결과와 expected.txt 파일을 비교
+          diff expected.txt output.txt
