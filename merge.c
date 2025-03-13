@@ -8,7 +8,7 @@
 int main(int argc, char *argv[]) {
     if (argc != 4) {
         perror("잘못된 접근입니다.");
-        perror("사용법 : ./실행파일 파일1 파일2 파일3");
+        perror("사용법 : ./실행파일 <파일1> <파일2> <파일3>");
     }
 
     FILE *file1 = fopen(argv[1], "wb");

@@ -7,7 +7,7 @@
 int main(const int argc, char *argv[]) {
     if (argc != 3) {
         fprintf(stderr, "파일의 개수가 잘못되었습니다.\n");
-        fprintf(stderr, "사용방법 : ./실행파일 소스파일 목적지파일\n");
+        fprintf(stderr, "사용방법 : ./실행파일 <소스파일> <목적지파일>\n");
         return EXIT_FAILURE;
     }
 
