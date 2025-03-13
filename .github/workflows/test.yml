@@ -81,6 +81,19 @@ jobs:
           # 출력 결과와 expected.txt 파일을 비교, 차이가 있으면 실패
           diff expected.txt output.txt || { echo 'Merge test failed: output.txt does not match expected.txt'; exit 1; }
 
+      - name: Validate output file size
+        run: |
+          size1=$(stat -c %s file1.txt)
+          size2=$(stat -c %s file2.txt)
+          total=$((size1+size2))
+          out_size=$(stat -c %s output.txt)
+          if [ "$out_size" -ne "$total" ]; then
+            echo "Merge test failed: output.txt size ($out_size) does not equal sum of file1.txt ($size1) and file2.txt ($size2)"
+            exit 1
+          else
+            echo "Output file size verification succeeded."
+          fi
+
 #  write_tests:
 #    runs-on: ubuntu-22.04
 #    steps:

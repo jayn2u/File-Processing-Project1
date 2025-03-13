@@ -3,6 +3,7 @@
 //
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 
 int main(int argc, char *argv[]) {
     FILE *file1 = fopen(argv[1], "wb");
@@ -40,4 +41,27 @@ int main(int argc, char *argv[]) {
     fclose(file1);
     fclose(file2);
     fclose(file3);
+    // 내부 검증: 파일 크기 비교
+    struct stat stat2, stat3, statOut;
+    if (stat(argv[2], &stat2) != 0) {
+        perror("Error getting file2 size");
+        exit(EXIT_FAILURE);
+    }
+    if (stat(argv[3], &stat3) != 0) {
+        perror("Error getting file3 size");
+        exit(EXIT_FAILURE);
+    }
+    if (stat(argv[1], &statOut) != 0) {
+        perror("Error getting output file size");
+        exit(EXIT_FAILURE);
+    }
+
+    if (statOut.st_size != (stat2.st_size + stat3.st_size)) {
+        fprintf(stderr, "Verification failed: output file size (%ld) != file2 size (%ld) + file3 size (%ld)\n",
+                statOut.st_size, stat2.st_size, stat3.st_size);
+        exit(EXIT_FAILURE);
+    } else {
+        printf("Verification succeeded: output file size (%ld) equals file2 size (%ld) + file3 size (%ld)\n",
+               statOut.st_size, stat2.st_size, stat3.st_size);
+    }
 }
