@@ -5,26 +5,28 @@
 #include <stdlib.h>
 
 int main(const int argc, char *argv[]) {
-    if (argc > 3) {
-        printf("파일의 개수를 잘못되었습니다.");
+    if (argc != 3) {
+        fprintf(stderr, "파일의 개수가 잘못되었습니다.\n");
+        fprintf(stderr, "사용방법 : ./실행파일 소스파일 목적지파일\n");
+        return EXIT_FAILURE;
     }
 
     FILE *source = fopen(argv[1], "rb");
     if (source == NULL) {
-        printf("소스 파일이 없습니다.");
+        fprintf(stderr, "소스 파일이 없습니다.\n");
         return EXIT_FAILURE;
     }
 
     FILE *dest = fopen(argv[2], "wb");
     if (dest == NULL) {
-        printf("목적지 파일이 없습니다.");
+        fprintf(stderr, "목적지 파일이 없습니다.\n");
         return EXIT_FAILURE;
     }
 
     char buffer[1024];
-
-    while (fread(buffer, sizeof(char), 1, source) > 0) {
-        fwrite(buffer, sizeof(char), 1, dest);
+    size_t bytes_count = 10;
+    while (fread(buffer, sizeof(char), bytes_count, source) > 0) {
+        fwrite(buffer, sizeof(char), bytes_count, dest);
     }
 
     fclose(source);
