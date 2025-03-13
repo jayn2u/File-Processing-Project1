@@ -94,6 +94,54 @@ jobs:
             echo "Output file size verification succeeded."
           fi
 
+  read_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Compile read.c using default GCC
+        run: |
+          gcc -o read read.c
+
+      - name: Test read functionality
+        run: |
+          # 테스트용 파일 생성: 알파벳 소문자 26자를 포함하는 파일 생성
+          echo "abcdefghijklmnopqrstuvwxyz" > test.txt
+          
+          # 테스트 1: 오프셋 5, 바이트 수 10 (예상 결과: "fghijklmno")
+          expected_output=$(echo -n "fghijklmno")
+          output=$(./read 5 10 test.txt)
+          if [ "$output" != "$expected_output" ]; then
+            echo "테스트 1 실패: 예상 결과 '$expected_output', 실제 결과 '$output'"
+            exit 1
+          fi
+          
+          # 테스트 2: 바이트 수 0인 경우 (출력은 빈 문자열)
+          output=$(./read 5 0 test.txt)
+          if [ -n "$output" ]; then
+            echo "테스트 2 실패: 바이트 수가 0이면 출력이 없어야 함. 실제 결과 '$output'"
+            exit 1
+          fi
+          
+          # 테스트 3: 남은 바이트보다 큰 요청 - 오프셋 20, 바이트 수 10 (예상 결과: "uvwxyz")
+          expected_output=$(echo -n "uvwxyz")
+          output=$(./read 20 10 test.txt)
+          if [ "$output" != "$expected_output" ]; then
+            echo "테스트 3 실패: 예상 결과 '$expected_output', 실제 결과 '$output'"
+            exit 1
+          fi
+          
+          # 테스트 4: 오프셋이 파일 크기와 같은 경우 (출력은 빈 문자열)
+          file_length=$(stat -c %s test.txt)
+          output=$(./read $file_length 10 test.txt)
+          if [ -n "$output" ]; then
+            echo "테스트 4 실패: 파일 크기와 동일한 오프셋이면 출력이 없어야 함. 실제 결과 '$output'"
+            exit 1
+          fi
+          
+          echo "모든 read.c 테스트가 통과되었습니다."
+
 #  write_tests:
 #    runs-on: ubuntu-22.04
 #    steps:
