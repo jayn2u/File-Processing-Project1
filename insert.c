@@ -21,7 +21,6 @@ int main(const int argc, char *argv[]) {
             perror("입력된 문자열의 길이가 너무 짧습니다.");
             return EXIT_FAILURE;
         }
-        /* 양쪽 큰따옴표를 제외한 내부 문자열 복사 */
         memcpy(data, argv[2] + 1, len - 2);
         data[len - 2] = '\0';
     } else {
@@ -29,28 +28,28 @@ int main(const int argc, char *argv[]) {
         data[sizeof(data) - 1] = '\0';
     }
 
-    FILE *write = fopen(argv[3], "r+b");
-    if (write == NULL) {
+    FILE *insert = fopen(argv[3], "r+b");
+    if (insert == NULL) {
         perror("해당 파일이 없습니다.");
         return EXIT_FAILURE;
     }
 
-    if (fseek(write, 0, SEEK_END) != 0) {
+    if (fseek(insert, 0, SEEK_END) != 0) {
         perror("파일 오프셋 이동에 문제가 발생했습니다.");
-        fclose(write);
+        fclose(insert);
         return EXIT_FAILURE;
     }
 
-    const long file_size = ftell(write);
+    const long file_size = ftell(insert);
 
     long insert_offset = offset;
     if (file_size < insert_offset) {
         insert_offset = file_size;
     }
 
-    if (fseek(write, insert_offset, SEEK_SET) != 0) {
+    if (fseek(insert, insert_offset, SEEK_SET) != 0) {
         perror("파일 오프셋 이동에 문제가 발생했습니다.");
-        fclose(write);
+        fclose(insert);
         return EXIT_FAILURE;
     }
 
@@ -60,37 +59,37 @@ int main(const int argc, char *argv[]) {
         tail = malloc(remain_file_data_size);
         if (tail == NULL) {
             perror("메모리 할당 실패");
-            fclose(write);
+            fclose(insert);
             return EXIT_FAILURE;
         }
-        if (fread(tail, 1, remain_file_data_size, write) != remain_file_data_size) {
+        if (fread(tail, 1, remain_file_data_size, insert) != remain_file_data_size) {
             perror("파일 tail 읽기 실패");
             free(tail);
-            fclose(write);
+            fclose(insert);
             return EXIT_FAILURE;
         }
     }
 
-    if (fseek(write, insert_offset, SEEK_SET) != 0) {
+    if (fseek(insert, insert_offset, SEEK_SET) != 0) {
         perror("파일 오프셋 이동에 문제가 발생했습니다.");
         if (tail) free(tail);
-        fclose(write);
+        fclose(insert);
         return EXIT_FAILURE;
     }
 
     const size_t data_len = strlen(data);
-    if (fwrite(data, 1, data_len, write) != data_len) {
+    if (fwrite(data, 1, data_len, insert) != data_len) {
         perror("파일에 데이터를 쓰는 도중 문제가 발생했습니다.");
         if (tail) free(tail);
-        fclose(write);
+        fclose(insert);
         return EXIT_FAILURE;
     }
 
     if (remain_file_data_size > 0) {
-        if (fwrite(tail, 1, remain_file_data_size, write) != remain_file_data_size) {
+        if (fwrite(tail, 1, remain_file_data_size, insert) != remain_file_data_size) {
             perror("파일 tail 재작성에 실패했습니다.");
             free(tail);
-            fclose(write);
+            fclose(insert);
             return EXIT_FAILURE;
         }
         free(tail);
