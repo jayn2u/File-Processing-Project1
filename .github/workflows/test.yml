@@ -152,7 +152,7 @@ jobs:
         run: |
           gcc -o write write.c
 
-      - name: Run additional write tests
+      - name: Run write tests
         run: |
           # Test Case 1: Offset within file boundaries
           echo "abcdefghij" > write1.txt

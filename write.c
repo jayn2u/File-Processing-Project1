@@ -15,11 +15,15 @@ int main(const int argc, char *argv[]) {
     const long offset = strtol(argv[1], NULL, 10);
 
     char data[1024];
-    if (argv[2][0] == '"') {
-        if (sscanf(argv[2], "\"%[^\"]\"", data) != 1) {
-            perror("입력된 문자열에서 큰따옴표 안의 내용을 추출할 수 없습니다.\n");
+    if (argv[2][0] == '"' && argv[2][strlen(argv[2]) - 1] == '"') {
+        size_t len = strlen(argv[2]);
+        if (len < 2) {
+            perror("입력된 문자열의 길이가 너무 짧습니다.");
             return EXIT_FAILURE;
         }
+        /* 양쪽 큰따옴표를 제외한 내부 문자열 복사 */
+        memcpy(data, argv[2] + 1, len - 2);
+        data[len - 2] = '\0';
     } else {
         strncpy(data, argv[2], sizeof(data) - 1);
         data[sizeof(data) - 1] = '\0';
