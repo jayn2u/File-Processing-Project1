@@ -11,7 +11,7 @@
 int main(const int argc, const char *argv[]) {
     if (argc != 4) {
         perror("잘못된 인자의 접근");
-        perror("사용방법 오류");
+        perror("사용방법 : a.out <오프셋> <바이트 수> <파일명>");
         return EXIT_FAILURE;
     }
 
