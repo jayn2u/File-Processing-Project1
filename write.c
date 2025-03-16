@@ -12,7 +12,6 @@ int main(const int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-
     const long offset = strtol(argv[1], NULL, 10);
 
     char data[1024];
@@ -52,5 +51,27 @@ int main(const int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
+    // 개행 문자 이슈를 해결하기 위해 마지막에 개행이 없으면 추가합니다.
+    // 파일의 현재 끝 위치를 확인 후, 마지막 문자가 개행인지 확인합니다.
+
+    if (fseek(write, 0, SEEK_END) == 0) {
+        long endPos = ftell(write);
+        if (endPos > 0) {
+            if (fseek(write, endPos - 1, SEEK_SET) == 0) {
+                char lastChar;
+                if (fread(&lastChar, 1, 1, write) == 1) {
+                    if (lastChar != '\n') {
+                        fseek(write, 0, SEEK_END);
+                        fputc('\n', write);
+                    }
+                }
+            }
+        } else {
+            // 파일이 비어있다면 바로 개행을 하나 추가하고 넘어갑니다.
+            fputc('\n', write);
+        }
+    }
+
+    fclose(write);
     return EXIT_SUCCESS;
 }
