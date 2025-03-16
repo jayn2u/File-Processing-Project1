@@ -142,71 +142,62 @@ jobs:
           
           echo "모든 read.c 테스트가 통과되었습니다."
 
-  write_tests:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Compile write.c using default GCC
-        run: |
-          gcc -o write write.c
-
-      - name: Test Case 1 - Offset within file boundaries
-        run: |
-          echo "abcdefghij" > write1.txt
-          ./write 5 "XYZ" write1.txt
-          echo "abcdeXYZfghij" > expected_write1.txt
-          diff expected_write1.txt write1.txt || { echo 'Write test 1 failed'; exit 1; }
-
-      - name: Test Case 2 - Offset equals file length (append at EOF)
-        run: |
-          echo "hello" > write2.txt
-          ./write 5 " world" write2.txt
-          echo "hello world" > expected_write2.txt
-          diff expected_write2.txt write2.txt || { echo 'Write test 2 failed'; exit 1; }
-
-      - name: Test Case 3 - Offset in the middle with data longer than the remaining part (extending file)
-        run: |
-          echo "12345" > write3.txt
-          ./write 3 "ABCDE" write3.txt
-          echo "123ABCDE45" > expected_write3.txt
-          diff expected_write3.txt write3.txt || { echo 'Write test 3 failed'; exit 1; }
-
-      - name: Test Case 4 - Offset 0 (overwrite beginning of the file)
-        run: |
-          echo "abcdef" > write4.txt
-          ./write 0 "NEW" write4.txt
-          echo "NEWabcdef" > expected_write4.txt
-          diff expected_write4.txt write4.txt || { echo 'Write test 4 failed'; exit 1; }
-
-      - name: Test Case 5 - Offset in the middle causing file extension
-        run: |
-          echo "0123456" > write5.txt
-          ./write 4 "XYZW" write5.txt
-          echo "0123XYZW456" > expected_write5.txt
-          diff expected_write5.txt write5.txt || { echo 'Write test 5 failed'; exit 1; }
-
-#  insert_tests:
+#  write_tests:
 #    runs-on: ubuntu-22.04
 #    steps:
 #      - name: Checkout repository
 #        uses: actions/checkout@v3
 #
-#      - name: Compile insert.c using default GCC
+#      - name: Compile write.c using default GCC
 #        run: |
-#          gcc -o insert insert.c
-#
-#      - name: Prepare test input and run insert
-#        run: |
-#          echo "abcdefghij" > insert.txt
-#          ./insert 7 "XYZ" insert.txt
-#
-#      - name: Validate insert output using diff
-#        run: |
-#          echo "abcdefghXYZij" > expected_insert.txt
-#          diff expected_insert.txt insert.txt || { echo 'Insert test failed: insert.txt does not match expected content'; exit 1; }
-#
+#          gcc -o write write.c
+
+
+  insert_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Compile insert.c using default GCC
+        run: |
+          gcc -o insert insert.c
+
+      - name: Insert Test Case 1 - Offset within file boundaries
+        run: |
+          echo "abcdefghij" > insert1.txt
+          ./insert 5 "XYZ" insert1.txt
+          echo "abcdeXYZfghij" > expected_insert1.txt
+          diff expected_insert1.txt insert1.txt || { echo 'Insert test 1 failed'; exit 1; }
+
+      - name: Insert Test Case 2 - Offset equals file length (append at EOF)
+        run: |
+          echo "hello" > insert2.txt
+          ./insert 5 " world" insert2.txt
+          echo "hello world" > expected_insert2.txt
+          diff expected_insert2.txt insert2.txt || { echo 'Insert test 2 failed'; exit 1; }
+
+      - name: Insert Test Case 3 - Offset in the middle with data longer than the remaining part (extending file)
+        run: |
+          echo "12345" > insert3.txt
+          ./insert 3 "ABCDE" insert3.txt
+          echo "123ABCDE45" > expected_insert3.txt
+          diff expected_insert3.txt insert3.txt || { echo 'Insert test 3 failed'; exit 1; }
+
+      - name: Insert Test Case 4 - Offset 0 (overwrite beginning of the file)
+        run: |
+          echo "abcdef" > insert4.txt
+          ./insert 0 "NEW" insert4.txt
+          echo "NEWabcdef" > expected_insert4.txt
+          diff expected_insert4.txt insert4.txt || { echo 'Insert test 4 failed'; exit 1; }
+
+      - name: Insert Test Case 5 - Offset in the middle causing file extension
+        run: |
+          echo "0123456" > insert5.txt
+          ./insert 4 "XYZW" insert5.txt
+          echo "0123XYZW456" > expected_insert5.txt
+          diff expected_insert5.txt insert5.txt || { echo 'Insert test 5 failed'; exit 1; }
+
 #  delete_tests:
 #    runs-on: ubuntu-22.04
 #    steps:
