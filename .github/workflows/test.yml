@@ -39,6 +39,21 @@ jobs:
           # 정리
           rm empty.txt empty_copy.txt
 
+      - name: 멀티라인 파일 복사 테스트
+        run: |
+          # 멀티라인 파일 생성 (여러 줄의 텍스트)
+          cat <<EOF > multiline_source.txt
+          첫번째 줄
+          두번째 줄
+          세번째 줄
+          EOF
+          # copy 실행: multiline_source.txt를 복사하여 multiline_dest.txt로 생성
+          ./copy multiline_source.txt multiline_dest.txt
+          # 결과 검증: 원본과 복사본 비교
+          diff multiline_source.txt multiline_dest.txt || { echo 'Copy test failed: multiline file copy did not match'; exit 1; }
+          # 정리
+          rm multiline_source.txt multiline_dest.txt
+
       - name: 바이너리 파일 복사 테스트
         run: |
           # 1MB 크기의 바이너리 파일 생성
@@ -94,6 +109,25 @@ jobs:
             echo "Output file size verification succeeded."
           fi
 
+      - name: 멀티라인 병합 테스트
+        run: |
+          # 멀티라인 파일 생성
+          cat <<EOF > file1_multiline.txt
+          첫번째 줄
+          두번째 줄
+          EOF
+          cat <<EOF > file2_multiline.txt
+          세번째 줄
+          네번째 줄
+          EOF
+          # merge 실행: output_multiline.txt에 두 파일 병합 결과 저장
+          ./merge output_multiline.txt file1_multiline.txt file2_multiline.txt
+          # 검증: expected_multiline.txt 생성
+          cat file1_multiline.txt file2_multiline.txt > expected_multiline.txt
+          diff expected_multiline.txt output_multiline.txt || { echo 'Merge test failed: multiline merge did not match expected'; exit 1; }
+          # 정리
+          rm file1_multiline.txt file2_multiline.txt expected_multiline.txt output_multiline.txt
+
   read_tests:
     runs-on: ubuntu-22.04
     steps:
@@ -141,6 +175,23 @@ jobs:
           fi
           
           echo "모든 read.c 테스트가 통과되었습니다."
+
+      - name: read 멀티라인 테스트
+        run: |
+          # 멀티라인 파일 생성
+          cat <<EOF > multiline_test.txt
+          line1
+          line2
+          line3
+          EOF
+          # 전체 파일 읽기 테스트: 오프셋 0, 17바이트 읽기 ("line1\nline2\nline3")
+          expected_output=$(printf "line1\nline2\nline3")
+          output=$(./read 0 17 multiline_test.txt)
+          if [ "$output" != "$expected_output" ]; then
+            echo "멀티라인 read 테스트 실패: 예상 결과 '$expected_output', 실제 결과 '$output'"
+            exit 1
+          fi
+          rm multiline_test.txt
 
   write_tests:
     runs-on: ubuntu-22.04
@@ -202,6 +253,25 @@ jobs:
           echo -n "12XYZ123" > expected_extend.txt
           diff test_write_extend.txt expected_extend.txt || { echo 'Write test failed: overwrite with extension'; exit 1; }
 
+      - name: write 멀티라인 테스트
+        run: |
+          # 원본 멀티라인 파일 생성
+          cat <<EOF > test_write_multiline.txt
+          line1
+          line2
+          line3
+          EOF
+          # 오프셋 6 ("line1\n"의 길이)에서 "NEW"로 덮어쓰기
+          ./write 6 "NEW" test_write_multiline.txt
+          # 예상 결과: "line1\nNEWe2\nline3" ("line2"의 앞 3글자가 "NEW"로 대체)
+          expected_content=$(printf "line1\nNEWe2\nline3")
+          actual_content=$(cat test_write_multiline.txt)
+          if [ "$actual_content" != "$expected_content" ]; then
+            echo "write 멀티라인 테스트 실패: 예상 결과 '$expected_content', 실제 결과 '$actual_content'"
+            exit 1
+          fi
+          rm test_write_multiline.txt
+
   insert_tests:
     runs-on: ubuntu-22.04
     steps:
@@ -246,6 +316,20 @@ jobs:
           ./insert 4 "XYZW" insert5.txt
           echo -n "0123XYZW456" > expected_insert5.txt
           diff expected_insert5.txt insert5.txt || { echo 'Insert test 5 failed'; exit 1; }
+
+      - name: insert 멀티라인 테스트
+        run: |
+          cat <<EOF > insert_multiline.txt
+          line1
+          line2
+          line3
+          EOF
+          # 오프셋 6에서 "INSERT"를 삽입 ("line1\n" 다음에 삽입)
+          ./insert 6 "INSERT" insert_multiline.txt
+          # 예상 결과: "line1\nINSERTline2\nline3"
+          expected=$(printf "line1\nINSERTline2\nline3")
+          diff insert_multiline.txt <(echo -n "$expected") || { echo 'Insert test failed: multiline insert did not match expected'; exit 1; }
+          rm insert_multiline.txt
 
   delete_tests:
     runs-on: ubuntu-22.04
@@ -298,6 +382,19 @@ jobs:
           ./delete 7 10 delete_test5.txt
           echo -n "1234567" > expected_test5.txt
           diff expected_test5.txt delete_test5.txt || { echo 'Delete test 5 failed'; exit 1; }
+
+      - name: delete 멀티라인 테스트
+        run: |
+          cat <<EOF > delete_multiline.txt
+          line1
+          line2
+          line3
+          EOF
+          # 오프셋 6에서 3바이트 삭제하여 "line2"의 "lin"을 제거 (결과: "e2")
+          ./delete 6 3 delete_multiline.txt
+          expected=$(printf "line1\ne2\nline3")
+          diff delete_multiline.txt <(echo -n "$expected") || { echo 'Delete test failed: multiline delete did not match expected'; exit 1; }
+          rm delete_multiline.txt
 
       - name: 모든 delete 테스트 완료
         run: echo "모든 delete.c 테스트가 통과되었습니다."
