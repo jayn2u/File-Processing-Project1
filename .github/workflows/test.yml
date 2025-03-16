@@ -152,15 +152,37 @@ jobs:
         run: |
           gcc -o write write.c
 
-      - name: Prepare test input and run write
+      - name: Run additional write tests
         run: |
-          echo "abcdefghij" > write.txt
-          ./write 5 "XYZ" write.txt
+          # Test Case 1: Offset within file boundaries
+          echo "abcdefghij" > write1.txt
+          ./write 5 "XYZ" write1.txt
+          echo "abcdeXYZfghij" > expected_write1.txt
+          diff expected_write1.txt write1.txt || { echo 'Write test 1 failed'; exit 1; }
 
-      - name: Validate write output using diff
-        run: |
-          echo "abcdeXYZfghij" > expected_write.txt
-          diff expected_write.txt write.txt || { echo 'Write test failed: write.txt does not match expected content'; exit 1; }
+          # Test Case 2: Offset equals file length (append at EOF)
+          echo "hello" > write2.txt
+          ./write 5 " world" write2.txt
+          echo "hello world" > expected_write2.txt
+          diff expected_write2.txt write2.txt || { echo 'Write test 2 failed'; exit 1; }
+
+          # Test Case 3: Offset in the middle with data longer than the remaining part (extending file)
+          echo "12345" > write3.txt
+          ./write 3 "ABCDE" write3.txt
+          echo "123ABCDE45" > expected_write3.txt
+          diff expected_write3.txt write3.txt || { echo 'Write test 3 failed'; exit 1; }
+
+          # Test Case 4: Offset 0 (overwrite beginning of the file)
+          echo "abcdef" > write4.txt
+          ./write 0 "NEW" write4.txt
+          echo "NEWadcdef" > expected_write4.txt
+          diff expected_write4.txt write4.txt || { echo 'Write test 4 failed'; exit 1; }
+
+          # Test Case 5: Offset in the middle causing file extension
+          echo "0123456" > write5.txt
+          ./write 4 "XYZW" write5.txt
+          echo "0123XYZW456" > expected_write5.txt
+          diff expected_write5.txt write5.txt || { echo 'Write test 5 failed'; exit 1; }
 
 #  insert_tests:
 #    runs-on: ubuntu-22.04
