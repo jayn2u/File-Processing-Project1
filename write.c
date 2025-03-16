@@ -51,23 +51,6 @@ int main(const int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    if (fseek(write, 0, SEEK_END) == 0) {
-        long endPos = ftell(write);
-        if (endPos > 0) {
-            if (fseek(write, endPos - 1, SEEK_SET) == 0) {
-                char lastChar;
-                if (fread(&lastChar, 1, 1, write) == 1) {
-                    if (lastChar != '\n') {
-                        fseek(write, 0, SEEK_END);
-                        fputc('\n', write);
-                    }
-                }
-            }
-        } else {
-            fputc('\n', write);
-        }
-    }
-
     fclose(write);
     return EXIT_SUCCESS;
 }
