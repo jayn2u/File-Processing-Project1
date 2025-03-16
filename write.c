@@ -5,55 +5,92 @@
 #include <stdlib.h>
 #include <string.h>
 
-/**
- * @brief 메인 함수
- *
- * 사용법: a.out <오프셋> <데이터> <파일명>
- *
- * @param argc 인자의 개수
- * @param argv 인자 배열 (argv[1]: 오프셋, argv[2]: 데이터, argv[3]: 파일명)
- * @return int 프로그램 종료 상태
- */
-int main(int argc, char *argv[]) {
-    // 1. 인자 개수 검증
+int main(const int argc, char *argv[]) {
     if (argc != 4) {
-        fprintf(stderr, "Usage: %s <오프셋> <데이터> <파일명>\n", argv[0]);
+        perror("잘못된 접근입니다.\n");
+        perror("사용방법 : a.out <오프셋> <데이터> <파일명>");
         return EXIT_FAILURE;
     }
 
-    // 2. 오프셋 파싱 및 데이터/파일명 저장
-    long offset = atol(argv[1]);
-    char *data = argv[2];
-    char *filename = argv[3];
+    const long offset = strtol(argv[1], NULL, 10);
 
-    // 3. 파일 열기 ("r+b": 읽기/쓰기, 기존 파일 필수)
-    FILE *fp = fopen(filename, "r+b");
-    if (!fp) {
-        perror("파일 열기 실패");
+    char data[1024];
+    if (argv[2][0] == '"') {
+        if (sscanf(argv[2], "\"%[^\"]\"", data) != 1) {
+            perror("입력된 문자열에서 큰따옴표 안의 내용을 추출할 수 없습니다.\n");
+            return EXIT_FAILURE;
+        }
+    } else {
+        strncpy(data, argv[2], sizeof(data) - 1);
+        data[sizeof(data) - 1] = '\0';
+    }
+
+    FILE *write = fopen(argv[3], "r+b");
+    if (write == NULL) {
+        perror("해당 파일이 없습니다.");
         return EXIT_FAILURE;
     }
 
-    // 4. 파일 포인터를 오프셋 위치로 이동
-    if (fseek(fp, offset, SEEK_SET) != 0) {
-        perror("파일 위치 이동 실패");
-        fclose(fp);
+    if (fseek(write, 0, SEEK_END) != 0) {
+        perror("파일 오프셋 이동에 문제가 발생했습니다.");
+        fclose(write);
         return EXIT_FAILURE;
     }
 
-    // 5. 데이터 쓰기 (오버라이트)
-    size_t data_len = strlen(data);
-    size_t written = fwrite(data, 1, data_len, fp);
-    if (written != data_len) {
-        perror("쓰기 오류");
-        fclose(fp);
+    const long file_size = ftell(write);
+
+    long insert_offset = offset;
+    if (file_size < insert_offset) {
+        insert_offset = file_size;
+    }
+
+    if (fseek(write, insert_offset, SEEK_SET) != 0) {
+        perror("파일 오프셋 이동에 문제가 발생했습니다.");
+        fclose(write);
         return EXIT_FAILURE;
     }
 
-    // 6. 버퍼 플러시 후 파일 닫기
-    if (fflush(fp) != 0) {
-        perror("fflush 오류");
+    const size_t remain_file_data_size = file_size - insert_offset;
+    char *tail = NULL;
+    if (remain_file_data_size > 0) {
+        tail = malloc(remain_file_data_size);
+        if (tail == NULL) {
+            perror("메모리 할당 실패");
+            fclose(write);
+            return EXIT_FAILURE;
+        }
+        if (fread(tail, 1, remain_file_data_size, write) != remain_file_data_size) {
+            perror("파일 tail 읽기 실패");
+            free(tail);
+            fclose(write);
+            return EXIT_FAILURE;
+        }
     }
-    fclose(fp);
+
+    if (fseek(write, insert_offset, SEEK_SET) != 0) {
+        perror("파일 오프셋 이동에 문제가 발생했습니다.");
+        if (tail) free(tail);
+        fclose(write);
+        return EXIT_FAILURE;
+    }
+
+    const size_t data_len = strlen(data);
+    if (fwrite(data, 1, data_len, write) != data_len) {
+        perror("파일에 데이터를 쓰는 도중 문제가 발생했습니다.");
+        if (tail) free(tail);
+        fclose(write);
+        return EXIT_FAILURE;
+    }
+
+    if (remain_file_data_size > 0) {
+        if (fwrite(tail, 1, remain_file_data_size, write) != remain_file_data_size) {
+            perror("파일 tail 재작성에 실패했습니다.");
+            free(tail);
+            fclose(write);
+            return EXIT_FAILURE;
+        }
+        free(tail);
+    }
 
     return EXIT_SUCCESS;
 }

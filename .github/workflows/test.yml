@@ -142,26 +142,26 @@ jobs:
           
           echo "모든 read.c 테스트가 통과되었습니다."
 
-#  write_tests:
-#    runs-on: ubuntu-22.04
-#    steps:
-#      - name: Checkout repository
-#        uses: actions/checkout@v3
-#
-#      - name: Compile write.c using default GCC
-#        run: |
-#          gcc -o write write.c
-#
-#      - name: Prepare test input and run write
-#        run: |
-#          echo "abcdefghij" > write.txt
-#          ./write 5 "XYZ" write.txt
-#
-#      - name: Validate write output using diff
-#        run: |
-#          echo "abcdeXYZij" > expected_write.txt
-#          diff expected_write.txt write.txt || { echo 'Write test failed: write.txt does not match expected content'; exit 1; }
-#
+  write_tests:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Compile write.c using default GCC
+        run: |
+          gcc -o write write.c
+
+      - name: Prepare test input and run write
+        run: |
+          echo "abcdefghij" > write.txt
+          ./write 5 "XYZ" write.txt
+
+      - name: Validate write output using diff
+        run: |
+          echo "abcdeXYZij" > expected_write.txt
+          diff expected_write.txt write.txt || { echo 'Write test failed: write.txt does not match expected content'; exit 1; }
+
 #  insert_tests:
 #    runs-on: ubuntu-22.04
 #    steps:
