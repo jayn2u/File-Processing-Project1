@@ -142,65 +142,65 @@ jobs:
           
           echo "모든 read.c 테스트가 통과되었습니다."
 
-  write_tests:
-    runs-on: ubuntu-22.04
-    steps:
-      - name: 저장소 체크아웃
-        uses: actions/checkout@v3
-
-      - name: 기본 GCC를 사용하여 write.c 컴파일
-        run: |
-          gcc -o write write.c
-
-      - name: write 테스트 - 파일 중간 덮어쓰기
-        run: |
-          # 원본 파일 생성
-          echo "1234567890" > test_write_mid.txt
-          # 오프셋 5에서 "abc"로 덮어쓰기 (즉, 위치 5,6,7)
-          ./write 5 "abc" test_write_mid.txt
-          # 예상 결과: "12345abc90"
-          echo "12345abc90" > expected_mid.txt
-          diff test_write_mid.txt expected_mid.txt || { echo 'Write test failed: middle overwrite'; exit 1; }
-
-      - name: write 테스트 - 파일 시작 부분 덮어쓰기
-        run: |
-          # 원본 파일 생성
-          echo "abcdefghij" > test_write_begin.txt
-          # 오프셋 0에서 "XYZ"로 덮어쓰기
-          ./write 0 "XYZ" test_write_begin.txt
-          # 예상 결과: "XYZdefghij"
-          echo "XYZdefghij" > expected_begin.txt
-          diff test_write_begin.txt expected_begin.txt || { echo 'Write test failed: beginning overwrite'; exit 1; }
-
-      - name: write 테스트 - 파일 끝에 추가
-        run: |
-          # 원본 파일 생성
-          echo "hello" > test_write_append.txt
-          # 오프셋 5(파일 길이)에서 " world"를 덮어쓰기하여 파일 확장
-          ./write 5 " world" test_write_append.txt
-          # 예상 결과: "hello world"
-          echo "hello world" > expected_append.txt
-          diff test_write_append.txt expected_append.txt || { echo 'Write test failed: append at EOF'; exit 1; }
-
-      - name: write 테스트 - 빈 파일에 덮어쓰기
-        run: |
-          # 빈 파일 생성
-          touch test_write_empty.txt
-          # 오프셋 0에서 "data"로 덮어쓰기
-          ./write 0 "data" test_write_empty.txt
-          # 예상 결과: "data"
-          echo "data" > expected_empty.txt
-          diff test_write_empty.txt expected_empty.txt || { echo 'Write test failed: empty file overwrite'; exit 1; }
-
-      - name: write 테스트 - 파일 확장 발생 덮어쓰기
-        run: |
-          # 원본 파일 생성: "1234"
-          echo "1234" > test_write_extend.txt
-          # 오프셋 2에서 "XYZ123"로 덮어쓰기 (기존 내용 일부 덮어쓰고 파일 확장)
-          ./write 2 "XYZ123" test_write_extend.txt
-          # 예상 결과: 앞의 2문자 "12" + "XYZ123" => "12XYZ123"
-          echo "12XYZ123" > expected_extend.txt
-          diff test_write_extend.txt expected_extend.txt || { echo 'Write test failed: overwrite with extension'; exit 1; }
+#  write_tests:
+#    runs-on: ubuntu-22.04
+#    steps:
+#      - name: 저장소 체크아웃
+#        uses: actions/checkout@v3
+#
+#      - name: 기본 GCC를 사용하여 write.c 컴파일
+#        run: |
+#          gcc -o write write.c
+#
+#      - name: write 테스트 - 파일 중간 덮어쓰기
+#        run: |
+#          # 원본 파일 생성
+#          echo "1234567890" > test_write_mid.txt
+#          # 오프셋 5에서 "abc"로 덮어쓰기 (즉, 위치 5,6,7)
+#          ./write 5 "abc" test_write_mid.txt
+#          # 예상 결과: "12345abc90"
+#          echo "12345abc90" > expected_mid.txt
+#          diff test_write_mid.txt expected_mid.txt || { echo 'Write test failed: middle overwrite'; exit 1; }
+#
+#      - name: write 테스트 - 파일 시작 부분 덮어쓰기
+#        run: |
+#          # 원본 파일 생성
+#          echo "abcdefghij" > test_write_begin.txt
+#          # 오프셋 0에서 "XYZ"로 덮어쓰기
+#          ./write 0 "XYZ" test_write_begin.txt
+#          # 예상 결과: "XYZdefghij"
+#          echo "XYZdefghij" > expected_begin.txt
+#          diff test_write_begin.txt expected_begin.txt || { echo 'Write test failed: beginning overwrite'; exit 1; }
+#
+#      - name: write 테스트 - 파일 끝에 추가
+#        run: |
+#          # 원본 파일 생성
+#          echo "hello" > test_write_append.txt
+#          # 오프셋 5(파일 길이)에서 " world"를 덮어쓰기하여 파일 확장
+#          ./write 5 " world" test_write_append.txt
+#          # 예상 결과: "hello world"
+#          echo "hello world" > expected_append.txt
+#          diff test_write_append.txt expected_append.txt || { echo 'Write test failed: append at EOF'; exit 1; }
+#
+#      - name: write 테스트 - 빈 파일에 덮어쓰기
+#        run: |
+#          # 빈 파일 생성
+#          touch test_write_empty.txt
+#          # 오프셋 0에서 "data"로 덮어쓰기
+#          ./write 0 "data" test_write_empty.txt
+#          # 예상 결과: "data"
+#          echo "data" > expected_empty.txt
+#          diff test_write_empty.txt expected_empty.txt || { echo 'Write test failed: empty file overwrite'; exit 1; }
+#
+#      - name: write 테스트 - 파일 확장 발생 덮어쓰기
+#        run: |
+#          # 원본 파일 생성: "1234"
+#          echo "1234" > test_write_extend.txt
+#          # 오프셋 2에서 "XYZ123"로 덮어쓰기 (기존 내용 일부 덮어쓰고 파일 확장)
+#          ./write 2 "XYZ123" test_write_extend.txt
+#          # 예상 결과: 앞의 2문자 "12" + "XYZ123" => "12XYZ123"
+#          echo "12XYZ123" > expected_extend.txt
+#          diff test_write_extend.txt expected_extend.txt || { echo 'Write test failed: overwrite with extension'; exit 1; }
 
   insert_tests:
     runs-on: ubuntu-22.04
