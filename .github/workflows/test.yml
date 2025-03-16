@@ -177,7 +177,7 @@ jobs:
         run: |
           echo "abcdef" > write4.txt
           ./write 0 "NEW" write4.txt
-          echo "NEWadcdef" > expected_write4.txt
+          echo "NEWabcdef" > expected_write4.txt
           diff expected_write4.txt write4.txt || { echo 'Write test 4 failed'; exit 1; }
 
       - name: Test Case 5 - Offset in the middle causing file extension
