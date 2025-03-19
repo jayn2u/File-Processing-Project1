@@ -5,28 +5,29 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 
-int main(int argc, char *argv[]) {
+int main(const int argc, char *argv[]) {
     if (argc != 4) {
-        perror("잘못된 접근입니다.");
-        perror("사용법 : ./실행파일 <파일1> <파일2> <파일3>");
+        fprintf(stderr, "잘못된 접근입니다.\n");
+        fprintf(stderr, "사용법 : ./실행파일 <파일1> <파일2> <파일3>\n");
+        exit(EXIT_FAILURE);
     }
 
     FILE *file1 = fopen(argv[1], "wb");
     if (file1 == NULL) {
-        perror("Error opening file1");
+        fprintf(stderr, "Error opening file1\n");
         exit(EXIT_FAILURE);
     }
 
     FILE *file2 = fopen(argv[2], "rb");
     if (file2 == NULL) {
-        perror("Error opening file2");
+        fprintf(stderr, "Error opening file2\n");
         fclose(file1);
         exit(EXIT_FAILURE);
     }
 
     FILE *file3 = fopen(argv[3], "rb");
     if (file3 == NULL) {
-        perror("Error opening file3");
+        fprintf(stderr, "Error opening file3\n");
         fclose(file1);
         fclose(file2);
         exit(EXIT_FAILURE);
@@ -49,15 +50,15 @@ int main(int argc, char *argv[]) {
     // 내부 검증: 파일 크기 비교
     struct stat stat2, stat3, statOut;
     if (stat(argv[2], &stat2) != 0) {
-        perror("Error getting file2 size");
+        fprintf(stderr, "Error getting file2 size\n");
         exit(EXIT_FAILURE);
     }
     if (stat(argv[3], &stat3) != 0) {
-        perror("Error getting file3 size");
+        fprintf(stderr, "Error getting file3 size\n");
         exit(EXIT_FAILURE);
     }
     if (stat(argv[1], &statOut) != 0) {
-        perror("Error getting output file size");
+        fprintf(stderr, "Error getting output file size\n");
         exit(EXIT_FAILURE);
     }
 
