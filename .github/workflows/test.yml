@@ -153,6 +153,22 @@ jobs:
             exit 1
           fi
           
+          # 테스트 5: 오프셋 0, 바이트 수가 파일 전체 길이인 경우 (전체 출력)
+          expected_output=$(echo -n "abcdefghijklmnopqrstuvwxyz")
+          output=$(./read 0 26 test.txt)
+          if [ "$output" != "$expected_output" ]; then
+            echo "테스트 5 실패: 예상 결과 '$expected_output', 실제 결과 '$output'"
+            exit 1
+          fi
+          
+          # 테스트 6: 오프셉트가 파일 끝에서 1바이트 앞 (25), 바이트 수 10인 경우 (출력은 마지막 1바이트만)
+          expected_output=$(echo -n "z")
+          output=$(./read 25 10 test.txt)
+          if [ "$output" != "$expected_output" ]; then
+            echo "테스트 6 실패: 예상 결과 '$expected_output', 실제 결과 '$output'"
+            exit 1
+          fi
+          
           echo "모든 read.c 테스트가 통과되었습니다."
 
   write_tests:
@@ -297,7 +313,7 @@ jobs:
       - name: delete 테스트 케이스 4 - offset이 파일 길이를 초과
         run: |
           echo -n "ABCDEF" > delete_test4.txt
-          # offset=10, 바이트 수=5 => 파일 길이(6)를 넘어서는 오프셋, 실제로 삭제되는 데이터 없음
+          # offset=10, 바이트 수=5 => 파일 길이(6)를 넘어서는 오프셉트, 실제로 삭제되는 데이터 없음
           ./delete 10 5 delete_test4.txt
           echo -n "ABCDEF" > expected_test4.txt
           diff expected_test4.txt delete_test4.txt || { echo 'Delete test 4 failed'; exit 1; }
