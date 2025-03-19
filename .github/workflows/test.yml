@@ -23,7 +23,7 @@ jobs:
           echo -n "GitHub Actions 테스트 파일" > source.txt
           # copy 실행: source.txt를 복사하여 dest.txt로 생성
           ./copy source.txt dest.txt
-          # 결과 검증
+          # 결과 검증: 원본과 복사본 파일이 동일한지 확인
           diff source.txt dest.txt || { echo 'Copy test failed: source.txt and dest.txt differ'; exit 1; }
           # 정리
           rm source.txt dest.txt
@@ -43,6 +43,19 @@ jobs:
         run: |
           # 존재하지 않는 소스 파일로 copy 실행, 실패가 예상됨
           ./copy non_existent.txt dest.txt && { echo 'Copy test failed: expected failure on non-existent source'; exit 1; } || echo "Expected failure occurred."
+
+      - name: 10바이트 단위 복사 및 기존 복사본 파일 초기화 테스트
+        run: |
+          # 원본 파일 생성 (총 25바이트: 10+10+5)
+          echo -n "0123456789ABCDEFGHIJKLMNO" > source.txt
+          # 기존 복사본 파일 생성 (미리 임의의 내용 입력)
+          echo -n "OLD_CONTENT" > dest.txt
+          # copy 실행: 기존 dest.txt의 내용을 초기화한 후 source.txt의 데이터를 10바이트 단위로 복사
+          ./copy source.txt dest.txt
+          # 결과 검증: 복사본 파일이 원본 파일과 동일한지 확인
+          diff source.txt dest.txt || { echo 'Copy test failed: destination content does not match source'; exit 1; }
+          # 정리
+          rm source.txt dest.txt
 
   merge_tests:
     runs-on: ubuntu-22.04

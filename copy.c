@@ -17,16 +17,18 @@ int main(const int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
 
-    FILE *dest = fopen(argv[2], "wb");
+    FILE *dest = fopen(argv[2], "wb"); // 존재하면 기존 내용 삭제, 없으면 새로 생성
     if (dest == NULL) {
-        fprintf(stderr, "목적지 파일이 없습니다.\n");
+        fprintf(stderr, "목적지 파일을 열 수 없습니다.\n");
+        fclose(source);
         return EXIT_FAILURE;
     }
 
-    char buffer[1024];
-    size_t bytes_count = 1;
-    while (fread(buffer, sizeof(char), bytes_count, source) > 0) {
-        fwrite(buffer, sizeof(char), bytes_count, dest);
+    char buffer[10];
+    size_t bytes_read;
+    // 10바이트 단위로 읽어, 마지막 남은 데이터도 처리
+    while ((bytes_read = fread(buffer, 1, 10, source)) > 0) {
+        fwrite(buffer, 1, bytes_read, dest);
     }
 
     fclose(source);
