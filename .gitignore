@@ -4,3 +4,5 @@
 # Sample Text 파일
 *.txt
 
+# idea file
+.idea
